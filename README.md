@@ -3,8 +3,8 @@ A Logseq plugging for writing music notation and guitar tabs.
 
 ## Current milestone
 
-The project currently contains a small browser renderer. It takes VexTab text,
-parses it with VexTab, and draws the result as SVG through VexFlow.
+The project currently contains a small renderer. It takes VexTab text, parses
+it with VexTab, and draws the result as SVG through VexFlow.
 
 The important separation is:
 
@@ -33,19 +33,34 @@ To view the renderer in a browser during development:
 npm run dev
 ```
 
-Open the local URL printed by Vite. The example notation is defined in
-`src/main.ts`. The reusable rendering function is in `src/renderer.ts`.
+Open the local URL printed by Vite and add `/demo.html` to it. The example
+notation is defined in `src/demo.ts`. The reusable rendering function is in
+`src/renderer.ts`.
+
+The plugin entry is `src/main.ts`. To test it in Logseq, build the project and
+use Logseq Desktop's developer mode to load the project directory as an
+unpacked plugin. Then use the command palette to run `Show VexTab preview`, or
+type `/Insert VexTab example` in a block.
+
+The slash command inserts this format, which Logseq renders through the
+experimental fenced-code renderer API:
+
+````markdown
+```vextab
+tabstave notation=true
+notes 4-5-6/3 ## | 5-4-2/3 2/2
+```
+````
 
 ## Project structure
 
 ```text
 src/
-├── main.ts       # Temporary browser demo entry point
+├── main.ts       # Logseq plugin entry point
+├── demo.ts       # Standalone browser demo entry point
 ├── renderer.ts   # VexTab text -> SVG rendering
 └── vextab.d.ts   # TypeScript declarations for VexTab's JS package
 ```
 
-The next step is to add a separate Logseq entry point. It should read a chosen
-block's VexTab text and call `renderVexTab` in a Logseq-provided container. The
-renderer should remain independent of Logseq so it can continue to be tested
-in the browser.
+The renderer remains independent of Logseq so it can continue to be tested in
+the browser. The Logseq-specific fenced-code integration is in `src/main.ts`.
