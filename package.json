@@ -1,0 +1,39 @@
+{
+  "name": "logseq-vextab",
+  "version": "1.0.0",
+  "description": "A Logseq plugging for writing music notation and guitar tabs.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/veziop/logseq-vextab.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/veziop/logseq-vextab/issues"
+  },
+  "homepage": "https://github.com/veziop/logseq-vextab#readme",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@logseq/libs": "^0.3.4",
+    "vexflow": "^5.0.0",
+    "vextab": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0"
+  },
+  "engines": {
+    "node": ">=22 <23"
+  }
+}
