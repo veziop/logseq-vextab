@@ -4,10 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VexTab renderer demo</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        transition:
+          background-color 0.15s,
+          color 0.15s;
+      }
+      #theme-toggle {
+        margin-bottom: 1rem;
+      }
+    </style>
   </head>
   <body>
     <main>
       <h1>VexTab renderer demo</h1>
+      <button id="theme-toggle" type="button">Toggle dark mode</button>
       <div id="notation" aria-label="Rendered music notation"></div>
     </main>
     <script type="module" src="/src/demo.ts"></script>

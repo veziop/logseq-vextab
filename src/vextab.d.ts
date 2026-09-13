@@ -1,16 +1,14 @@
 declare module "vextab" {
-  export const Vex: {
-    Flow: {
-      Renderer: {
-        new (element: HTMLElement, backend: unknown): unknown;
-        Backends: { SVG: unknown };
-      };
-    };
-  };
+  import type { Renderer } from "vexflow";
 
   export class Artist {
-    constructor(x: number, y: number, width: number, options?: { scale?: number });
-    render(renderer: unknown): void;
+    constructor(
+      x: number,
+      y: number,
+      width: number,
+      options?: { scale?: number },
+    );
+    render(renderer: Renderer): void;
   }
 
   export class VexTab {

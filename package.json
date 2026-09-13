@@ -4,7 +4,11 @@
   "description": "A Logseq plugging for writing music notation and guitar tabs.",
   "main": "dist/index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "repository": {
     "type": "git",
@@ -25,11 +29,6 @@
     "minSDKVersion": "0.3.4"
   },
   "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
-  },
   "dependencies": {
     "@logseq/libs": "^0.3.4",
     "vexflow": "^5.0.0",
@@ -37,6 +36,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.20.2",
+    "prettier": "^3.9.6",
     "typescript": "^7.0.2",
     "vite": "^8.3.0"
   },

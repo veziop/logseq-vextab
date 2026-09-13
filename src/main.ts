@@ -3,17 +3,40 @@ import "@logseq/libs";
 const exampleVexTab = `tabstave notation=true
 notes 4-5-6/3 ## | 5-4-2/3 2/2`;
 
-type VexTabRenderer = (
-  container: HTMLElement,
-  source: string,
-  options?: { foregroundColor?: string },
-) => void;
-
 type ThemeMode = "light" | "dark";
 
-function foregroundForTheme(mode: ThemeMode): string {
-  const fallback = mode === "dark" ? "#f5f5f5" : "#1f1f1f";
-  return `var(--ls-primary-text-color, ${fallback})`;
+interface VexTabColors {
+  foregroundColor: string;
+  backgroundColor: string;
+}
+
+// Resolve Logseq's theme CSS variables to concrete color values (rather than
+// passing raw `var(...)` strings into the renderer) so the colors baked into the
+// generated SVG are self-contained and don't depend on `var()` support inside SVG
+// presentation attributes.
+function resolveThemeVar(name: string, fallback: string): string {
+  const value = getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
+  return value || fallback;
+}
+
+function colorsForTheme(mode: ThemeMode): VexTabColors {
+  const fallback =
+    mode === "dark"
+      ? { foregroundColor: "#f5f5f5", backgroundColor: "#1d1d1d" }
+      : { foregroundColor: "#1f1f1f", backgroundColor: "#ffffff" };
+
+  return {
+    foregroundColor: resolveThemeVar(
+      "--ls-primary-text-color",
+      fallback.foregroundColor,
+    ),
+    backgroundColor: resolveThemeVar(
+      "--ls-primary-background-color",
+      fallback.backgroundColor,
+    ),
+  };
 }
 
 async function main(): Promise<void> {
@@ -23,6 +46,11 @@ async function main(): Promise<void> {
   if (!notation) {
     throw new Error("The notation container is missing.");
   }
+
+  // Every container we've rendered a vextab block into, keyed to its source, so we
+  // can redraw them with new colors when Logseq's theme changes. Entries whose
+  // container has been removed from the DOM are pruned on each theme change.
+  const renderedBlocks = new Map<HTMLElement, string>();
 
   logseq.Editor.registerSlashCommand("Insert VexTab example", async () => {
     await logseq.Editor.insertAtEditingCursor(
@@ -48,7 +76,6 @@ async function main(): Promise<void> {
 
       return React.createElement("div", {
         style: {
-          color: foregroundForTheme(currentThemeMode),
           overflowX: "auto",
         },
         ref: async (container: HTMLElement | null) => {
@@ -56,12 +83,16 @@ async function main(): Promise<void> {
             return;
           }
 
+          renderedBlocks.set(container, content);
+
           try {
             rendererPromise ??= import("./renderer");
             const { renderVexTab } = await rendererPromise;
-            renderVexTab(container, content, {
-              foregroundColor: foregroundForTheme(currentThemeMode),
-            });
+            await renderVexTab(
+              container,
+              content,
+              colorsForTheme(currentThemeMode),
+            );
           } catch (error) {
             console.error("VexTab rendering failed", error);
             container.textContent = "Unable to render this VexTab block.";
@@ -79,32 +110,44 @@ async function main(): Promise<void> {
     async () => {
       const { renderVexTab } = await import("./renderer");
 
-      renderVexTab(notation, exampleVexTab, {
-        foregroundColor: foregroundForTheme(currentThemeMode),
-      });
+      renderedBlocks.set(notation, exampleVexTab);
+      await renderVexTab(
+        notation,
+        exampleVexTab,
+        colorsForTheme(currentThemeMode),
+      );
       logseq.showMainUI({ autoFocus: false });
     },
   );
 
-  logseq.setMainUIInlineStyle({
-    backgroundColor: "var(--ls-primary-background-color)",
-    color: foregroundForTheme(currentThemeMode),
-    padding: "24px",
-  });
-
-  const applyTheme = ({ mode }: { mode: ThemeMode }): void => {
+  const applyTheme = async ({ mode }: { mode: ThemeMode }): Promise<void> => {
     currentThemeMode = mode;
-    const foregroundColor = foregroundForTheme(mode);
-    document.documentElement.style.setProperty(
-      "--vextab-foreground",
-      foregroundColor,
-    );
-    notation.style.color = foregroundColor;
-    logseq.setMainUIInlineStyle({ color: foregroundColor });
+    const colors = colorsForTheme(mode);
+
+    logseq.setMainUIInlineStyle({
+      backgroundColor: colors.backgroundColor,
+      color: colors.foregroundColor,
+      padding: "24px",
+    });
+
+    const { renderVexTab } = await import("./renderer");
+
+    for (const [container, content] of renderedBlocks) {
+      if (!container.isConnected) {
+        renderedBlocks.delete(container);
+        continue;
+      }
+
+      try {
+        await renderVexTab(container, content, colors);
+      } catch (error) {
+        console.error("VexTab re-render failed", error);
+      }
+    }
   };
 
   const userConfigs = await logseq.App.getUserConfigs();
-  applyTheme({ mode: userConfigs.preferredThemeMode as ThemeMode });
+  await applyTheme({ mode: userConfigs.preferredThemeMode as ThemeMode });
   const offThemeModeChanged = logseq.App.onThemeModeChanged(applyTheme);
 
   const handleKeyDown = (event: KeyboardEvent): void => {
