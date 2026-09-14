@@ -58,6 +58,14 @@ async function main(): Promise<void> {
     );
   });
 
+  logseq.Editor.registerSlashCommand("Blank VexTab", [
+    [
+      "editor/input",
+      "```vextab\ntabstave notation=false \n```",
+      { "backward-pos": 4 },
+    ],
+  ]);
+
   let rendererPromise: Promise<typeof import("./renderer")> | undefined;
 
   logseq.Experiments.registerFencedCodeRenderer("vextab", {
