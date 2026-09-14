@@ -74,15 +74,29 @@ export async function renderVexTab(
     return;
   }
 
-  // setBackgroundFillStyle only colors the small erase-rectangles VexFlow draws
-  // internally, not the SVG canvas itself - set that explicitly too so the whole
-  // block matches the current theme instead of showing a stray white canvas.
-  svg.style.background = backgroundColor;
+  // Keep the canvas itself transparent so the block blends into whatever
+  // background Logseq's current theme paints behind it, rather than stamping its
+  // own opaque rectangle on top. The small erase-rectangles VexFlow draws behind
+  // tab fret numbers still use setBackgroundFillStyle(backgroundColor) above, so
+  // those digits stay legible against the theme background.
+  svg.style.background = "transparent";
 
   svg.querySelectorAll<SVGElement>("text, a, g").forEach((element) => {
     if (element.textContent?.toLowerCase().includes("vexflow.com")) {
       element.remove();
     }
+  });
+
+  // Note stems (and beams) are the "vertical lines" attached to each notehead.
+  // VexFlow - via vextab's bundled copy - writes a hardcoded stroke="black" onto
+  // both the root <svg> (its default, which beams inherit) and every individual
+  // stem group, ignoring the foreground color we set on the render context. On a
+  // dark theme that renders every stem and beam as a black line against the dark
+  // background. Re-point both at the resolved foreground color so all stroked
+  // note geometry follows light/dark mode like the rest of the notation does.
+  svg.setAttribute("stroke", foregroundColor);
+  svg.querySelectorAll<SVGGElement>("g.vf-stem").forEach((stem) => {
+    stem.setAttribute("stroke", foregroundColor);
   });
 
   // Barlines are drawn as a hairline rect exactly 1 unit wide *before* the
