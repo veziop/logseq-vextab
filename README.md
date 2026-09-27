@@ -1,20 +1,10 @@
 # logseq-vextab
 
-A Logseq plugging for writing music notation and guitar tabs.
+A Logseq plugging for writing music notation and guitar tabs. This plugin uses the FOSS [VexTab](https://vexflow.com/vextab/).
 
-## Current milestone
+Follow the official tutorial [here](https://vexflow.com/vextab/tutorial.html)
 
-The project currently contains a small renderer. It takes VexTab text, parses
-it with VexTab, and draws the result as SVG through VexFlow.
-
-The important separation is:
-
-```text
-VexTab text -> renderer.ts -> SVG element
-```
-
-Logseq is not involved in this first step. That makes the notation engine easy
-to test before connecting it to Logseq's editor and page model.
+*Note*: only tested in Logseq OG (markdown version).
 
 ## Prerequisites
 
@@ -53,15 +43,13 @@ notes 4-5-6/3 ## | 5-4-2/3 2/2
 ```
 ````
 
-## Project structure
+## Installation into Logseq
 
-```text
-src/
-├── main.ts       # Logseq plugin entry point
-├── demo.ts       # Standalone browser demo entry point
-├── renderer.ts   # VexTab text -> SVG rendering
-└── vextab.d.ts   # TypeScript declarations for VexTab's JS package
-```
+Once the software has been cloned/download and built with npm, all you need to do is:
+1. enable the developer mode in the application settings (*Settings > Advanced > Developer mode*)
+2. open the plugins window and click *Load unpacked plugin*
+3. select the *root of this project* (not the dist/ directory)
 
-The renderer remains independent of Logseq so it can continue to be tested in
-the browser. The Logseq-specific fenced-code integration is in `src/main.ts`.
+## Roadmap
+
+The next goal is to get this plugin listed on the official marketplace. Timing is uncertain, though: [Logseq DB beta shipped in mid-2026](), and how that affects the marketplace submission process isn't clear yet.
