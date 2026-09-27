@@ -1,10 +1,6 @@
 import { Renderer, type RenderContext } from "vexflow";
 import { Artist, VexTab } from "vextab";
 
-// vextab bundles its own internal copy of vexflow (rather than sharing the one
-// this file imports), so mutating vexflow's exported metrics objects directly
-// has no effect on what vextab actually draws - element sizes/colors have to be
-// adjusted on the rendered SVG itself instead, after render() runs.
 const ARTIST_SCALE = 0.8;
 
 export interface VexTabColors {
@@ -88,7 +84,7 @@ export async function renderVexTab(
   });
 
   // Note stems (and beams) are the "vertical lines" attached to each notehead.
-  // VexFlow - via vextab's bundled copy - writes a hardcoded stroke="black" onto
+  // VexFlow writes a hardcoded stroke="black" onto
   // both the root <svg> (its default, which beams inherit) and every individual
   // stem group, ignoring the foreground color we set on the render context. On a
   // dark theme that renders every stem and beam as a black line against the dark
@@ -115,9 +111,6 @@ export async function renderVexTab(
       }
     });
 
-  // vextab bundles its own internal copy of vexflow's metrics, so overriding
-  // this package's exported font-size defaults has no effect (see note above) -
-  // bump the rendered tab fret-number text directly instead.
   svg.querySelectorAll<SVGTextElement>("g.vf-tabnote text").forEach((text) => {
     if (/^\d+$/.test(text.textContent?.trim() ?? "")) {
       text.setAttribute("font-size", "13pt");
